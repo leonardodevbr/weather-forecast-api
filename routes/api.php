@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +12,15 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+use Illuminate\Support\Facades\Route;
+
+Route::group([
+    'namespace' => 'Api',
+    'middleware' => ['web', 'api'],
+], function ($route) {
+    $route->get('cities', 'CitiesController@listing');
+    $route->get('cities/{lon?}/{lat?}', 'CitiesController@listing');
+    $route->get('cities-weather-available', 'CitiesController@listingWeatherAvailable');
+    $route->get('city/{cityName}', 'CitiesController@show');
+    $route->get('city/{cityName}/{from?}/{to?}', 'CitiesController@show');
 });
