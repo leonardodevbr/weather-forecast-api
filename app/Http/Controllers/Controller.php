@@ -30,14 +30,16 @@ class Controller extends BaseController
         );
     }
 
-    public static function getCitiesCollection(): Collection
+    public static function getCitiesCollection($withWeatherAvailable = false): Collection
     {
         $arrayCities = json_decode(file_get_contents(database_path('city_list.json')), true);
         $citiesList = [];
         foreach ($arrayCities as $cityData) {
             $city = new City();
             array_push($citiesList, $city->fill($cityData));
-            $city['weathers'] = Controller::getWeatherCollection()->where('city_id', $city->id)->all();
+            if ($withWeatherAvailable) {
+                $city['weathers'] = Controller::getWeatherCollection()->where('city_id', $city->id)->all();
+            }
         }
 
         return Collection::make($citiesList);

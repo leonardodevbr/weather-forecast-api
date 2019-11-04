@@ -82,16 +82,8 @@ class CitiesController extends Controller
 
     public function getCities($withWeatherAvailable = false)
     {
-        $cities = Controller::getCitiesCollection()
+        $cities = Controller::getCitiesCollection($withWeatherAvailable)
             ->all();
-
-        if ($withWeatherAvailable) {
-            $cities = array_filter($cities, function ($city) {
-                if (!empty($city->weathers)) {
-                    return $city;
-                }
-            });
-        }
 
         return $cities;
     }
