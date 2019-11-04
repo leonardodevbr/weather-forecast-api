@@ -10,7 +10,6 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
-use function foo\func;
 
 class Controller extends BaseController
 {
@@ -31,6 +30,16 @@ class Controller extends BaseController
         );
     }
 
+    /**
+     * Retrieves a city list from a .json file and converts it to a collection.
+     * This collection can be filtered by those with weather information and a
+     * range of weather dates.
+     *
+     * @param bool $onlyWithWeatherAvailable
+     * @param null $from
+     * @param null $to
+     * @return Collection
+     */
     public static function getCitiesCollection($onlyWithWeatherAvailable = false, $from = null, $to = null): Collection
     {
         $arrayCities = json_decode(file_get_contents(database_path('city_list.json')), true);
@@ -53,6 +62,14 @@ class Controller extends BaseController
         return Collection::make($citiesList);
     }
 
+    /**
+     * Retrieves a weather list from a .json file and converts it to a collection.
+     * This collection can be filtered by the range of weather dates.
+     *
+     * @param null $from
+     * @param null $to
+     * @return Collection
+     */
     public static function getWeatherCollection($from = null, $to = null): Collection
     {
         $arrayWeathers = json_decode(file_get_contents(database_path('weather_list.json')), true);
