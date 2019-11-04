@@ -13,6 +13,7 @@ class Weather extends Model
         'id',
         'city_id',
         'dt',
+        'dt_formatted',
         'temp',
         'pressure',
         'humidity',

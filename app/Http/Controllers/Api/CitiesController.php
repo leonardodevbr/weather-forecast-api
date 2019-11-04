@@ -12,10 +12,11 @@ class CitiesController extends Controller
         $response = $this->createResponse();
 
         try {
-            $cities = $this->getCities();
 
             if (!empty($lon) && !empty($lat)) {
                 $cities = $this->getCitiesByGeolocation($lon, $lat);
+            } else {
+                $cities = $this->getCities();
             }
 
             $response->data = [
@@ -62,7 +63,7 @@ class CitiesController extends Controller
         $response = $this->createResponse();
         try {
 
-            $city = Controller::getCitiesCollection()
+            $city = Controller::getCitiesCollection(true, $from, $to)
                 ->where('name', $cityName)->first();
 
             $response->data = [
@@ -90,8 +91,14 @@ class CitiesController extends Controller
 
     public function getCitiesByGeolocation($lon, $lat)
     {
-        $cities = Controller::getCitiesCollection()
+        $cities = Controller::getCitiesCollection(true)
             ->all();
+
+        $cities = array_filter($cities, function ($city) use ($lon, $lat) {
+            if ($city['coord']['lon'] == $lon && $city['coord']['lat'] == $lat) {
+                return $city;
+            }
+        });
 
         return $cities;
     }

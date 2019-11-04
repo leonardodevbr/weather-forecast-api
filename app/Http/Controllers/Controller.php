@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Model\City;
 use App\Model\Weather;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -30,7 +31,7 @@ class Controller extends BaseController
         );
     }
 
-    public static function getCitiesCollection($withWeatherAvailable = false): Collection
+    public static function getCitiesCollection($withWeatherAvailable = false, $from = null, $to = null): Collection
     {
         $arrayCities = json_decode(file_get_contents(database_path('city_list.json')), true);
         $citiesList = [];
@@ -38,25 +39,36 @@ class Controller extends BaseController
             $city = new City();
             array_push($citiesList, $city->fill($cityData));
             if ($withWeatherAvailable) {
-                $city['weathers'] = Controller::getWeatherCollection()->where('city_id', $city->id)->all();
+                $weathers = Controller::getWeatherCollection($from, $to)->where('city_id', $city->id)->all();
+                $city['weathers'] = $weathers;
             }
         }
 
         return Collection::make($citiesList);
     }
 
-    public static function getWeatherCollection(): Collection
+    public static function getWeatherCollection($from = null, $to = null): Collection
     {
         $arrayWeathers = json_decode(file_get_contents(database_path('weather_list.json')), true);
         $weatherList = [];
 
         foreach ($arrayWeathers as $city) {
             foreach ($city['data'] as $weathers) {
-                foreach ($weathers as $key => $weather) {
-                    $temp['city_id'] = $city['cityId'];
-                    $temp[$key] = $weather;
+                $weather['city_id'] = $city['cityId'];
+                foreach ($weathers as $key => $value) {
+                    if ($key == 'dt') {
+                        $weather['dt_formatted'] = Carbon::createFromTimestamp($value, 'America/Sao_Paulo')->format('d/m/Y');
+                    }
+                    $weather[$key] = $value;
                 }
-                array_push($weatherList, $temp);
+
+                if (empty($from) && empty($to)) {
+                    array_push($weatherList, $weather);
+                } else {
+                    if ($weather['dt'] >= strtotime($from) && $weather['dt'] < strtotime('+1 day', strtotime($to))) {
+                        array_push($weatherList, $weather);
+                    }
+                }
             }
         }
 
