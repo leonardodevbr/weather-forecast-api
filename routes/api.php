@@ -16,8 +16,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::group([
     'namespace' => 'Api',
-    'middleware' => ['web', 'api'],
+    'middleware' => ['api'],
 ], function ($route) {
+    $route->get('/', function () {
+        return response()->json(['message' => 'Weather Forecast API', 'status' => 'Connected']);
+    });
     $route->get('cities', 'CitiesController@listing');
     $route->get('cities/{lon?}/{lat?}', 'CitiesController@listing');
     $route->get('cities-weather-available', 'CitiesController@listingWeatherAvailable');
