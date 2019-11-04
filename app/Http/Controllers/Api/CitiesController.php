@@ -3,11 +3,19 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Response;
 
 class CitiesController extends Controller
 {
-    public function listing($lon = null, $lat = null)
+    /**
+     * Returns a simple list of cities
+     *
+     * @param null $lon
+     * @param null $lat
+     * @return JsonResponse
+     */
+    public function listing($lon = null, $lat = null): JsonResponse
     {
         $response = $this->createResponse();
 
@@ -35,7 +43,12 @@ class CitiesController extends Controller
         return Response::json($response);
     }
 
-    public function listingWeatherAvailable()
+    /**
+     * Returns a list of cities that have available weather information.
+     *
+     * @return JsonResponse
+     */
+    public function listingWeatherAvailable(): JsonResponse
     {
         $response = $this->createResponse();
         try {
@@ -58,13 +71,25 @@ class CitiesController extends Controller
         return Response::json($response);
     }
 
-    public function show($cityName, $from = null, $to = null)
+    /**
+     * Returns information about a city and its climate
+     *
+     * @param $cityName
+     * @param null $from
+     * @param null $to
+     * @return JsonResponse
+     */
+    public function show($cityName, $from = null, $to = null): JsonResponse
     {
         $response = $this->createResponse();
         try {
 
-            $city = Controller::getCitiesCollection(true, $from, $to)
-                ->where('name', $cityName)->first();
+            $query = Controller::getCitiesCollection();
+            if (!empty($from) && !empty($to)) {
+                $query = Controller::getCitiesCollection(true, $from, $to);
+            }
+
+            $city = $query->where('name', $cityName)->first();
 
             $response->data = [
                 'city' => $city
@@ -81,15 +106,29 @@ class CitiesController extends Controller
         return Response::json($response);
     }
 
-    public function getCities($withWeatherAvailable = false)
+
+    /**
+     * Returns an array of cities that can be filtered by those with or without climate information.
+     *
+     * @param bool $onlyWithWeatherAvailable
+     * @return array
+     */
+    public function getCities($onlyWithWeatherAvailable = false): array
     {
-        $cities = Controller::getCitiesCollection($withWeatherAvailable)
+        $cities = Controller::getCitiesCollection($onlyWithWeatherAvailable)
             ->all();
 
         return $cities;
     }
 
-    public function getCitiesByGeolocation($lon, $lat)
+    /**
+     * Returns an array of cities filtered by geolocation.
+     *
+     * @param $lon
+     * @param $lat
+     * @return array
+     */
+    public function getCitiesByGeolocation($lon, $lat): array
     {
         $cities = Controller::getCitiesCollection(true)
             ->all();
